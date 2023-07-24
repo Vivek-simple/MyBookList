@@ -1,6 +1,7 @@
 const form = document.querySelector("#book-form")
 const tbody = document.querySelector("#book-list")
 
+
 class Book{
 
 constructor(title,author,isbn){
@@ -18,7 +19,7 @@ class UI{
           <td>${book.title}</td>
           <td>${book.author}</td>
           <td>${book.isbn}</td>
-          <td><a href="#" class="btn btn-danger btn-right">X</a></td>
+          <td><a href="#" class="btn btn-danger btn-right delete">X</a></td>
         
         `
        tbody.appendChild(tr)
@@ -56,8 +57,8 @@ class store{
     static addBook(book){
         let myBooks = store.getBooks()
         
-        myBooks.push({book})
-        console.log("hi")
+        myBooks.push(book)
+
         localStorage.setItem("books",JSON.stringify(myBooks))
      }
      
@@ -99,3 +100,27 @@ window.addEventListener("DOMContentLoaded",()=>{
     let allBooks = store.getBooks()
     allBooks.forEach(item => UI.addBookToList(item))
  })
+
+ tbody.addEventListener("click",function(e){
+   if(e.target.classList.contains("delete")){
+
+    if(confirm("are u sure")){
+    tbody.removeChild(e.target.parentElement.parentElement)
+    removeDatabase(e.target.parentElement.previousElementSibling.textContent);
+    }
+     }
+ })
+
+ function removeDatabase(isbn){
+   
+  let arr=(JSON.parse(localStorage.getItem("books")));
+//let ar  = [1,2,3,4]
+arr.forEach((book,index)=>{
+    if(book.isbn === isbn){
+   arr.splice(index,1)
+    }
+ })
+ localStorage.setItem('books',JSON.stringify(arr));
+
+
+}
