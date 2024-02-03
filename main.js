@@ -1,126 +1,89 @@
-const form = document.querySelector("#book-form")
-const tbody = document.querySelector("#book-list")
+let title = document.querySelector('#title')
+let author = document.querySelector('#author')
+let isbn = document.querySelector('#isbn')
+let form = document.querySelector('#book-form')
+let tbody = document.querySelector('#book-list')
 
+let books
+document.addEventListener('DOMContentLoaded', function () {
 
-class Book{
-
-constructor(title,author,isbn){
-    this.title=title
-    this.author=author
-    this.isbn=isbn
-}
-}
-
-class UI{
-
-    static addBookToList(book){
-        let tr = document.createElement("tr")//<tr></tr>
-        tr.innerHTML = `
-          <td>${book.title}</td>
-          <td>${book.author}</td>
-          <td>${book.isbn}</td>
-          <td><a href="#" class="btn btn-danger btn-right delete">X</a></td>
-        
-        `
-       tbody.appendChild(tr)
+    if (localStorage.getItem('books') === null) {
+        books = [];
     }
-   
-    static getValueFromElement(idValue){
-        return document.querySelector("#"+idValue).value
-
+    else {
+        books = JSON.parse(localStorage.getItem('books'));
+        books.forEach((item) => {
+            add(item)
+        })
     }
 
-    static clearAllFields(){
-        document.querySelector("#author").value=""
-        document.querySelector("#title").value=""
-        document.querySelector("#isbn").value=""
+});
+
+
+form.addEventListener('submit', function (e) {
+    e.preventDefault()
+    if (title.value == '' || author.value == '' || isbn.value == '') {
+        showAlert('Please fill all the fields', 'danger')
     }
-
-    static setAlert(msg,className){
-        let div=document.createElement("div")
-        div.innerHTML=msg
-        div.className="alert alert-"+className
-        let container=document.querySelector(".container")
-        container.insertBefore(div,form)
-
-        setTimeout(()=>{
-            document.querySelector(".alert").remove()
-
-        },2000)
-    }
-
-}
-
-
-class store{
-
-    static addBook(book){
-        let myBooks = store.getBooks()
-        
-        myBooks.push(book)
-
-        localStorage.setItem("books",JSON.stringify(myBooks))
-     }
-     
-
-     static getBooks(){
-        let books
-     
-        if(localStorage.getItem("books") === null){
-           books = []
-        }else{
-           books = JSON.parse(localStorage.getItem("books"))
+    else {
+        let data =
+        {
+            title: title.value,
+            author: author.value,
+            isbn: isbn.value
         }
-     
-     
-        return books
-     }
-     
-}
-
-
- form.addEventListener("submit",e=>{
-    e.preventDefault();
-    let title = UI.getValueFromElement("title")
-    let author = UI.getValueFromElement("author")
-    let isbn  = UI.getValueFromElement("isbn")
-   if(title==="" || author==="" || isbn===""){
-  UI.setAlert("Please fill all the fields","danger")
-   }else{
-    let book=new Book(title,author,isbn)
-   UI.addBookToList(book)
-   store.addBook(book)
-   UI.setAlert("succesfully added","success")
-   UI.clearAllFields()
-   
-   }
+        books.push(data)
+        add(data)
+        showAlert('Book Added Successfully', 'success')
+        localStorage.setItem('books', JSON.stringify(books))
+        pro
+        title.value = ''
+        author.value = ''
+        isbn.value = ''
+    }
 })
 
-window.addEventListener("DOMContentLoaded",()=>{
-    let allBooks = store.getBooks()
-    allBooks.forEach(item => UI.addBookToList(item))
- })
 
- tbody.addEventListener("click",function(e){
-   if(e.target.classList.contains("delete")){
+function add(data) {
+    console.log(data)
+    let row = document.createElement('tr')
+    row.innerHTML =
+        `<td>${data.title}</td>
+    <td>${data.author}</td>
+    <td>${data.isbn}</td>
+    <td><a href="#" class='btn btn-danger btn-sm delete'>X</a></td>`
+    tbody.appendChild(row)
 
-    if(confirm("are u sure")){
-    tbody.removeChild(e.target.parentElement.parentElement)
-    removeDatabase(e.target.parentElement.previousElementSibling.textContent);
-    }
-     }
- })
-
- function removeDatabase(isbn){
-   
-  let arr=(JSON.parse(localStorage.getItem("books")));
-//let ar  = [1,2,3,4]
-arr.forEach((book,index)=>{
-    if(book.isbn === isbn){
-   arr.splice(index,1)
-    }
- })
- localStorage.setItem('books',JSON.stringify(arr));
+}
 
 
+tbody.addEventListener('click', (e) => {
+    Delete(e.target)
+})
+
+function Delete(el) {
+    let isbn = el.parentElement.parentElement.childNodes[4].textContent
+    if (el.classList.contains('delete'))
+        if (confirm('Are you sure want to delete this')) {
+            el.parentElement.parentElement.remove()
+            for (let i = 0; i < books.length; i++) {
+                if (books[i].isbn === isbn)
+                    console.log(books.splice(i, 1))
+            }
+            localStorage.setItem('books', JSON.stringify(books))
+        }
+
+}
+
+function showAlert(message, className) {
+    const div = document.createElement('div');
+    div.className = `alert alert-${className}`;
+    div.appendChild(document.createTextNode(message));
+    const container = document.querySelector('.container');
+    const form = document.querySelector('#book-form');
+    container.insertBefore(div, form);
+
+    setTimeout(function () {
+        document.querySelector('.alert').remove();
+    }, 3000)
 }
